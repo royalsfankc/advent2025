@@ -81,6 +81,21 @@ This repository uses GitHub Actions to automatically run tests on every push and
 - **Automatic testing**: All tests run automatically on push to `main` and on pull requests
 - **Merge protection**: Pull requests cannot be merged if tests fail
 - **Status badge**: Test status is displayed in the README and on pull requests
+- **Local pre-push hook**: Tests run locally before pushing to `main` (prevents pushing failing code)
+
+### Local Protection
+
+A git pre-push hook is configured to run tests before allowing pushes to `main`. If tests fail:
+- The push is blocked
+- You must fix the tests before pushing
+- This prevents broken code from reaching the repository
+
+To set up the hook (if not already present):
+```bash
+chmod +x .git/hooks/pre-push
+```
+
+### GitHub Actions Workflow
 
 The workflow runs:
 1. Checks out the code
