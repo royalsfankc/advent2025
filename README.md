@@ -1,5 +1,7 @@
 # Advent of Code 2025
 
+[![Tests](https://github.com/royalsfankc/advent2025/actions/workflows/test.yml/badge.svg)](https://github.com/royalsfankc/advent2025/actions/workflows/test.yml)
+
 A JavaScript project for solving Advent of Code 2025 puzzles, with a web interface that can be served on GitHub Pages. Built with clean code practices and comprehensive testing using Jest.
 
 ## Setup
@@ -71,6 +73,23 @@ See `REPO_RULES.md` for complete guidelines. The `.cursorrules` file ensures AI 
 - Run tests in watch mode: `npm test -- --watch`
 - Run tests with coverage: `npm test -- --coverage`
 - Run tests for a specific day: `npm test -- day1`
+
+## CI/CD Pipeline
+
+This repository uses GitHub Actions to automatically run tests on every push and pull request:
+
+- **Automatic testing**: All tests run automatically on push to `main` and on pull requests
+- **Merge protection**: Pull requests cannot be merged if tests fail
+- **Status badge**: Test status is displayed in the README and on pull requests
+
+The workflow runs:
+1. Checks out the code
+2. Sets up Node.js
+3. Installs dependencies with `npm ci`
+4. Runs all tests with `npm test`
+5. Optionally checks test coverage
+
+See `.github/workflows/test.yml` for the workflow configuration.
 
 ## GitHub Pages Setup
 
