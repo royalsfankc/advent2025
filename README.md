@@ -1,6 +1,7 @@
 # Advent of Code 2025
 
 [![Tests](https://github.com/royalsfankc/advent2025/actions/workflows/test.yml/badge.svg)](https://github.com/royalsfankc/advent2025/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/royalsfankc/advent2025/branch/main/graph/badge.svg)](https://codecov.io/gh/royalsfankc/advent2025)
 
 A JavaScript project for solving Advent of Code 2025 puzzles, with a web interface that can be served on GitHub Pages. Built with clean code practices and comprehensive testing using Jest.
 
@@ -79,6 +80,8 @@ See `REPO_RULES.md` for complete guidelines. The `.cursorrules` file ensures AI 
 This repository uses GitHub Actions to automatically run tests on every push and pull request:
 
 - **Automatic testing**: All tests run automatically on push to `main` and on pull requests
+- **Test coverage**: Coverage reports are generated and uploaded to Codecov
+- **Coverage badges**: Coverage percentage is displayed in the README
 - **Merge protection**: Pull requests cannot be merged if tests fail
 - **Status badge**: Test status is displayed in the README and on pull requests
 - **Local pre-push hook**: Tests run locally before pushing to `main` (prevents pushing failing code)
@@ -101,10 +104,27 @@ The workflow runs:
 1. Checks out the code
 2. Sets up Node.js
 3. Installs dependencies with `npm ci`
-4. Runs all tests with `npm test`
-5. Optionally checks test coverage
+4. Runs all tests with coverage using `npm run test:coverage`
+5. Uploads coverage reports to Codecov
+6. Stores coverage artifacts for 30 days
 
 See `.github/workflows/test.yml` for the workflow configuration.
+
+### Coverage Reporting
+
+Test coverage is automatically calculated and reported:
+- **Codecov**: Coverage reports are uploaded to [Codecov](https://codecov.io) for detailed analysis
+- **Coverage badge**: Shows current coverage percentage in the README
+- **PR comments**: Codecov can comment on pull requests with coverage changes
+- **Coverage artifacts**: Coverage HTML reports are stored as GitHub Actions artifacts
+
+To view detailed coverage locally:
+```bash
+npm run test:coverage
+open coverage/lcov-report/index.html
+```
+
+For Codecov setup instructions, see [.github/COVERAGE_SETUP.md](.github/COVERAGE_SETUP.md).
 
 ## GitHub Pages Setup
 
