@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { parseInput, isIngredientFresh, solvePart1, parseRangesOnly, getAllFreshIngredientIds, solvePart2 } from './solution.js';
+import { parseInput, isIngredientFresh, solvePart1, parseRangesOnly, mergeRanges, countFreshIngredientIds, solvePart2 } from './solution.js';
 
 describe('Day 5 Solution', () => {
     describe('parseInput', () => {
@@ -346,31 +346,111 @@ describe('Day 5 Solution', () => {
         });
     });
 
-    describe('getAllFreshIngredientIds', () => {
-        it('should collect all IDs from single range', () => {
-            const ranges = [{ start: 3, end: 5 }];
-            const result = getAllFreshIngredientIds(ranges);
+    describe('mergeRanges', () => {
+        it('should merge overlapping ranges', () => {
+            const ranges = [
+                { start: 1, end: 5 },
+                { start: 3, end: 10 }
+            ];
+            const result = mergeRanges(ranges);
             
-            expect(result.size).toBe(3);
-            expect(result.has(3)).toBe(true);
-            expect(result.has(4)).toBe(true);
-            expect(result.has(5)).toBe(true);
+            expect(result).toHaveLength(1);
+            expect(result[0]).toEqual({ start: 1, end: 10 });
         });
 
-        it('should collect all IDs from multiple non-overlapping ranges', () => {
+        it('should merge adjacent ranges', () => {
+            const ranges = [
+                { start: 1, end: 5 },
+                { start: 6, end: 10 }
+            ];
+            const result = mergeRanges(ranges);
+            
+            expect(result).toHaveLength(1);
+            expect(result[0]).toEqual({ start: 1, end: 10 });
+        });
+
+        it('should not merge non-overlapping ranges', () => {
+            const ranges = [
+                { start: 1, end: 5 },
+                { start: 10, end: 15 }
+            ];
+            const result = mergeRanges(ranges);
+            
+            expect(result).toHaveLength(2);
+            expect(result[0]).toEqual({ start: 1, end: 5 });
+            expect(result[1]).toEqual({ start: 10, end: 15 });
+        });
+
+        it('should handle multiple overlapping ranges', () => {
+            const ranges = [
+                { start: 3, end: 5 },
+                { start: 10, end: 14 },
+                { start: 16, end: 20 },
+                { start: 12, end: 18 }
+            ];
+            const result = mergeRanges(ranges);
+            
+            // Should merge: 3-5, 10-20 (12-18 and 16-20 merge with 10-14)
+            expect(result).toHaveLength(2);
+            expect(result[0]).toEqual({ start: 3, end: 5 });
+            expect(result[1]).toEqual({ start: 10, end: 20 });
+        });
+
+        it('should handle empty ranges array', () => {
+            const ranges = [];
+            const result = mergeRanges(ranges);
+            
+            expect(result).toHaveLength(0);
+        });
+
+        it('should handle single range', () => {
+            const ranges = [{ start: 1, end: 5 }];
+            const result = mergeRanges(ranges);
+            
+            expect(result).toHaveLength(1);
+            expect(result[0]).toEqual({ start: 1, end: 5 });
+        });
+
+        it('should sort ranges before merging', () => {
+            const ranges = [
+                { start: 10, end: 15 },
+                { start: 1, end: 5 }
+            ];
+            const result = mergeRanges(ranges);
+            
+            expect(result).toHaveLength(2);
+            expect(result[0]).toEqual({ start: 1, end: 5 });
+            expect(result[1]).toEqual({ start: 10, end: 15 });
+        });
+
+        it('should handle completely overlapping ranges', () => {
+            const ranges = [
+                { start: 1, end: 10 },
+                { start: 5, end: 15 }
+            ];
+            const result = mergeRanges(ranges);
+            
+            expect(result).toHaveLength(1);
+            expect(result[0]).toEqual({ start: 1, end: 15 });
+        });
+    });
+
+    describe('countFreshIngredientIds', () => {
+        it('should count IDs from single range', () => {
+            const ranges = [{ start: 3, end: 5 }];
+            const result = countFreshIngredientIds(ranges);
+            
+            expect(result).toBe(3); // 3, 4, 5
+        });
+
+        it('should count IDs from multiple non-overlapping ranges', () => {
             const ranges = [
                 { start: 1, end: 3 },
                 { start: 10, end: 12 }
             ];
-            const result = getAllFreshIngredientIds(ranges);
+            const result = countFreshIngredientIds(ranges);
             
-            expect(result.size).toBe(6);
-            expect(result.has(1)).toBe(true);
-            expect(result.has(2)).toBe(true);
-            expect(result.has(3)).toBe(true);
-            expect(result.has(10)).toBe(true);
-            expect(result.has(11)).toBe(true);
-            expect(result.has(12)).toBe(true);
+            expect(result).toBe(6); // 1-3 (3) + 10-12 (3) = 6
         });
 
         it('should handle overlapping ranges correctly', () => {
@@ -380,28 +460,10 @@ describe('Day 5 Solution', () => {
                 { start: 16, end: 20 },
                 { start: 12, end: 18 }
             ];
-            const result = getAllFreshIngredientIds(ranges);
+            const result = countFreshIngredientIds(ranges);
             
-            // Should have: 3,4,5 from first range
-            // 10,11,12,13,14 from second range
-            // 15,16,17,18 from third range (12-18 overlaps with 16-20)
-            // 19,20 from third range
-            // Total unique: 3,4,5,10,11,12,13,14,15,16,17,18,19,20 = 14
-            expect(result.size).toBe(14);
-            expect(result.has(3)).toBe(true);
-            expect(result.has(4)).toBe(true);
-            expect(result.has(5)).toBe(true);
-            expect(result.has(10)).toBe(true);
-            expect(result.has(11)).toBe(true);
-            expect(result.has(12)).toBe(true);
-            expect(result.has(13)).toBe(true);
-            expect(result.has(14)).toBe(true);
-            expect(result.has(15)).toBe(true);
-            expect(result.has(16)).toBe(true);
-            expect(result.has(17)).toBe(true);
-            expect(result.has(18)).toBe(true);
-            expect(result.has(19)).toBe(true);
-            expect(result.has(20)).toBe(true);
+            // Merged: 3-5 (3 IDs) + 10-20 (11 IDs) = 14
+            expect(result).toBe(14);
         });
 
         it('should handle completely overlapping ranges', () => {
@@ -409,13 +471,10 @@ describe('Day 5 Solution', () => {
                 { start: 1, end: 10 },
                 { start: 5, end: 15 }
             ];
-            const result = getAllFreshIngredientIds(ranges);
+            const result = countFreshIngredientIds(ranges);
             
-            // Should have: 1-15 (all unique)
-            expect(result.size).toBe(15);
-            for (let i = 1; i <= 15; i++) {
-                expect(result.has(i)).toBe(true);
-            }
+            // Merged: 1-15 = 15 IDs
+            expect(result).toBe(15);
         });
 
         it('should handle adjacent ranges', () => {
@@ -423,19 +482,17 @@ describe('Day 5 Solution', () => {
                 { start: 1, end: 5 },
                 { start: 6, end: 10 }
             ];
-            const result = getAllFreshIngredientIds(ranges);
+            const result = countFreshIngredientIds(ranges);
             
-            expect(result.size).toBe(10);
-            for (let i = 1; i <= 10; i++) {
-                expect(result.has(i)).toBe(true);
-            }
+            // Merged: 1-10 = 10 IDs
+            expect(result).toBe(10);
         });
 
         it('should handle empty ranges array', () => {
             const ranges = [];
-            const result = getAllFreshIngredientIds(ranges);
+            const result = countFreshIngredientIds(ranges);
             
-            expect(result.size).toBe(0);
+            expect(result).toBe(0);
         });
 
         it('should handle single-value ranges', () => {
@@ -443,11 +500,9 @@ describe('Day 5 Solution', () => {
                 { start: 5, end: 5 },
                 { start: 10, end: 10 }
             ];
-            const result = getAllFreshIngredientIds(ranges);
+            const result = countFreshIngredientIds(ranges);
             
-            expect(result.size).toBe(2);
-            expect(result.has(5)).toBe(true);
-            expect(result.has(10)).toBe(true);
+            expect(result).toBe(2); // 5 and 10
         });
 
         it('should handle ranges with same start and end', () => {
@@ -455,11 +510,10 @@ describe('Day 5 Solution', () => {
                 { start: 1, end: 1 },
                 { start: 1, end: 1 }
             ];
-            const result = getAllFreshIngredientIds(ranges);
+            const result = countFreshIngredientIds(ranges);
             
-            // Should only have 1 once (Set deduplicates)
-            expect(result.size).toBe(1);
-            expect(result.has(1)).toBe(true);
+            // Merged: 1-1 = 1 ID
+            expect(result).toBe(1);
         });
     });
 
