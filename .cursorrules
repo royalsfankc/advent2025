@@ -1,0 +1,92 @@
+# Advent of Code 2025 - AI Assistant Rules
+
+## CRITICAL RULES - MUST FOLLOW
+
+1. **EVERY FUNCTION MUST HAVE TESTS** - No exceptions. When creating a new function, immediately create tests for it. When modifying a function, update or create tests.
+
+2. **TEST-FIRST APPROACH** - Before committing changes, ensure all tests pass with `npm test`.
+
+3. **SIMPLE AND CLEAN CODE** - Keep code simple, readable, and avoid over-engineering. Use modern ES6+ JavaScript.
+
+## Function Requirements
+
+- **Export functions for testing** - All functions that can be tested should be exported
+- **Single responsibility** - Each function does one thing well
+- **Pure functions preferred** - Minimize side effects when possible
+- **Descriptive names** - Use clear, descriptive function names
+- **Small functions** - Keep functions focused (ideally < 50 lines)
+- **JSDoc comments** - Add JSDoc for complex functions
+
+## Code Structure Standards
+
+- Use ES6+ features (arrow functions, destructuring, async/await, etc.)
+- Break solutions into small, testable functions
+- Use named constants instead of magic numbers
+- Follow consistent formatting
+
+## Testing Requirements
+
+- **Location**: Tests in `dayN/solution.test.js` files
+- **Coverage**: Test all functions, including helpers
+- **Test cases**: Happy path, edge cases, error cases
+- **Naming**: Descriptive test names: `describe('functionName', () => { it('should do X when Y', ...) })`
+
+## Day Solution Structure
+
+```javascript
+// dayN/solution.js structure:
+// 1. Helper/utility functions (exported)
+// 2. solvePart1(input) - exported
+// 3. solvePart2(input) - exported  
+// 4. solve() - main async function, exported
+```
+
+## Workflow When Creating/Modifying Functions
+
+1. Write the function (or modify it)
+2. **IMMEDIATELY** write/update tests
+3. Run `npm test` to verify
+4. Refactor if needed (update tests accordingly)
+
+## Before Any Commit
+
+- All tests must pass: `npm test`
+- No console.log in production code (remove debug statements)
+- Code follows these rules
+- Functions are exported and testable
+
+## Example Pattern
+
+When creating a solution:
+1. Create helper functions (exported, tested)
+2. Create solvePart1 (exported, tested)
+3. Create solvePart2 (exported, tested)
+4. Create solve() that uses the above
+5. All functions have corresponding tests
+
+## Error Handling
+
+- Use try-catch for async operations
+- Return meaningful error messages
+- Test error cases
+
+## File Organization
+
+- `dayN/solution.js` - Solution code with exported functions
+- `dayN/solution.test.js` - Tests for all functions
+- `dayN/input.txt` - Puzzle input
+
+## When AI Assistant is Asked to:
+
+- **Create a function**: Immediately create tests for it
+- **Modify a function**: Update or create tests for it
+- **Add a day**: Create solution.js with exported functions AND solution.test.js with tests
+- **Fix a bug**: Write tests that reproduce the bug, then fix it
+
+## Remember
+
+- Simplicity over complexity
+- Tests are mandatory, not optional
+- Export functions to make them testable
+- Follow the structure in REPO_RULES.md for detailed examples
+

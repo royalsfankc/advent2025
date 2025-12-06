@@ -1,0 +1,81 @@
+# Advent of Code 2025
+
+A JavaScript project for solving Advent of Code 2025 puzzles, with a web interface that can be served on GitHub Pages. Built with clean code practices and comprehensive testing using Jest.
+
+## Setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Run tests:
+   ```bash
+   npm test
+   ```
+
+3. Start the local server:
+   ```bash
+   npm run serve
+   ```
+   This will automatically open your browser to `http://localhost:8080`
+
+   **Alternative methods:**
+   - Python: `python3 -m http.server 8080` (then open `http://localhost:8080`)
+   - VS Code: Use the "Live Server" extension
+
+## Structure
+
+- `index.html` - Main page with buttons for each day
+- `js/main.js` - Main JavaScript file that handles button clicks and displays answers
+- `js/main.test.js` - Tests for main.js functions
+- `day1/`, `day2/`, etc. - Folders for each day's puzzle
+  - `solution.js` - Solution code for that day (with exported functions for testing)
+  - `solution.test.js` - Tests for all functions in solution.js
+  - `input.txt` - Input file for that day
+- `REPO_RULES.md` - Coding standards and practices for this repository
+- `.cursorrules` - AI assistant rules (automatically used by Cursor)
+
+## Code Standards
+
+This project follows strict coding standards:
+- **Every function must have tests** - No exceptions
+- **Simple, clean code** - Follow best practices
+- **Pure functions preferred** - Minimize side effects
+- **Test-driven development** - Write tests when creating or modifying functions
+
+See `REPO_RULES.md` for complete guidelines. The `.cursorrules` file ensures AI assistants automatically follow these rules.
+
+## How to Use
+
+1. Start the local server: `npm run serve`
+2. Your browser will open automatically (or go to `http://localhost:8080`)
+3. Click a day button on the main page
+4. The solution will be executed and the answer displayed
+
+## Adding a New Day
+
+1. Create a new folder `dayN/` where N is the day number
+2. Create `dayN/solution.js` with:
+   - Helper functions (exported for testing)
+   - `solvePart1(input)` function (exported)
+   - `solvePart2(input)` function (exported)
+   - `solve()` function (exported, main entry point)
+3. Create `dayN/solution.test.js` with tests for all functions
+4. Add your input to `dayN/input.txt`
+5. Run tests: `npm test`
+
+## Testing
+
+- Run all tests: `npm test`
+- Run tests in watch mode: `npm test -- --watch`
+- Run tests with coverage: `npm test -- --coverage`
+- Run tests for a specific day: `npm test -- day1`
+
+## GitHub Pages Setup
+
+1. Go to your repository settings
+2. Navigate to Pages
+3. Select the branch (usually `main`) and folder (`/` root)
+4. The site will be available at `https://yourusername.github.io/advent2025/`
+
