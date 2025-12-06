@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { formatSolutionResult, formatErrorMessage, loadDaySolution } from './main.js';
+import { formatSolutionResult, formatErrorMessage, loadDaySolution, checkDaySolutionExists } from './main.js';
 
 describe('Main.js Functions', () => {
     describe('formatSolutionResult', () => {
@@ -61,6 +61,18 @@ describe('Main.js Functions', () => {
             expect(html).toContain('Error loading day 5:');
             expect(html).toContain('Failed to load');
             expect(html).toContain('error');
+        });
+    });
+
+    describe('checkDaySolutionExists', () => {
+        it('should return true for day 1 (exists)', async () => {
+            const exists = await checkDaySolutionExists(1);
+            expect(exists).toBe(true);
+        });
+
+        it('should return false for day 99 (does not exist)', async () => {
+            const exists = await checkDaySolutionExists(99);
+            expect(exists).toBe(false);
         });
     });
 

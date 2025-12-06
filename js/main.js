@@ -3,6 +3,20 @@
 const MAX_DAYS = 25;
 
 /**
+ * Checks if a day has a solution file available
+ * @param {number} day - The day number
+ * @returns {Promise<boolean>} True if solution exists
+ */
+export async function checkDaySolutionExists(day) {
+    try {
+        await import(`../day${day}/solution.js`);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
  * Formats the solution result into HTML
  * @param {Object} result - The solution result object
  * @returns {string} HTML string to display
@@ -54,16 +68,38 @@ export async function loadDaySolution(day) {
 }
 
 /**
+ * Scrolls to the answer container smoothly
+ */
+function scrollToAnswer() {
+    const answerContainer = document.getElementById('answerContainer');
+    if (answerContainer) {
+        answerContainer.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+    }
+}
+
+/**
  * Generates day buttons and adds them to the DOM
  * @param {HTMLElement} container - The container element to add buttons to
  * @param {Function} onClickHandler - Function to call when a button is clicked
  */
-export function generateDayButtons(container, onClickHandler) {
+export async function generateDayButtons(container, onClickHandler) {
     for (let day = 1; day <= MAX_DAYS; day++) {
         const button = document.createElement('button');
         button.className = 'day-button';
         button.textContent = `Day ${day}`;
-        button.addEventListener('click', () => onClickHandler(day));
+        
+        // Check if solution exists
+        const hasSolution = await checkDaySolutionExists(day);
+        if (!hasSolution) {
+            button.classList.add('disabled');
+            button.disabled = true;
+        } else {
+            button.addEventListener('click', () => onClickHandler(day));
+        }
+        
         container.appendChild(button);
     }
 }
@@ -81,6 +117,9 @@ async function showAnswer(day) {
     answerContainer.style.display = 'block';
     answerTitle.textContent = `Day ${day} Answers`;
     answerContent.innerHTML = '<span class="loading">Loading...</span>';
+    
+    // Scroll to answer container (especially useful on mobile)
+    scrollToAnswer();
     
     try {
         const result = await loadDaySolution(day);
