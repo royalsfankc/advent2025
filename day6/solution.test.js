@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { parseWorksheet, solveProblem, solvePart1 } from './solution.js';
+import { parseWorksheet, solveProblem, solvePart1, parseWorksheetPart2, solvePart2 } from './solution.js';
 
 describe('Day 6 Solution', () => {
     describe('parseWorksheet', () => {
@@ -149,6 +149,100 @@ describe('Day 6 Solution', () => {
             const result = solvePart1(input);
             // (10*5) + (20+10) = 50 + 30 = 80
             expect(result).toBe(80);
+        });
+    });
+
+    describe('parseWorksheetPart2', () => {
+        it('should parse the example correctly (right-to-left)', () => {
+            const input = `123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  `;
+            const result = parseWorksheetPart2(input);
+            
+            // Problems should be in right-to-left order
+            expect(result).toHaveLength(4);
+            // Rightmost: 4 + 431 + 623 = 1058
+            expect(result[0]).toEqual({ numbers: [4, 431, 623], operation: '+' });
+            // Second from right: 175 * 581 * 32 = 3253600
+            expect(result[1]).toEqual({ numbers: [175, 581, 32], operation: '*' });
+            // Third from right: 8 + 248 + 369 = 625
+            expect(result[2]).toEqual({ numbers: [8, 248, 369], operation: '+' });
+            // Leftmost: 356 * 24 * 1 = 8544
+            expect(result[3]).toEqual({ numbers: [356, 24, 1], operation: '*' });
+        });
+
+        it('should handle single problem', () => {
+            const input = `123
+ 45
+  6
+*`;
+            const result = parseWorksheetPart2(input);
+            
+            expect(result).toHaveLength(1);
+            // Numbers read right-to-left from columns: column 2=356, column 1=24, column 0=1
+            expect(result[0]).toEqual({ numbers: [356, 24, 1], operation: '*' });
+        });
+
+        it('should handle problems with single-digit numbers', () => {
+            const input = `1 2 3
+4 5 6
++ * +`;
+            const result = parseWorksheetPart2(input);
+            
+            expect(result).toHaveLength(3);
+            // Rightmost problem (column 2): 3, 6 = 36
+            expect(result[0]).toEqual({ numbers: [36], operation: '+' });
+            // Middle problem (column 1): 2, 5 = 25
+            expect(result[1]).toEqual({ numbers: [25], operation: '*' });
+            // Leftmost problem (column 0): 1, 4 = 14
+            expect(result[2]).toEqual({ numbers: [14], operation: '+' });
+        });
+
+        it('should handle empty input', () => {
+            const input = '';
+            const result = parseWorksheetPart2(input);
+            
+            expect(result).toHaveLength(0);
+        });
+    });
+
+    describe('solvePart2', () => {
+        it('should solve the example correctly', () => {
+            const input = `123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  `;
+            const result = solvePart2(input);
+            // 1058 + 3253600 + 625 + 8544 = 3263827
+            expect(result).toBe(3263827);
+        });
+
+        it('should handle single problem', () => {
+            const input = `123
+ 45
+  6
+*`;
+            const result = solvePart2(input);
+            // 356 * 24 * 1 = 8544
+            expect(result).toBe(8544);
+        });
+
+        it('should handle multiple problems', () => {
+            const input = `1 2
+3 4
++ *`;
+            const result = solvePart2(input);
+            // Rightmost problem (column 1): 2,4 = 24, operation +
+            // Leftmost problem (column 0): 1,3 = 13, operation *
+            // So: 24 + 13 = 37
+            expect(result).toBe(37);
+        });
+
+        it('should handle empty input', () => {
+            const input = '';
+            const result = solvePart2(input);
+            expect(result).toBe(0);
         });
     });
 });
