@@ -203,21 +203,22 @@ function extractJSDocDescription(jsdocComment) {
 }
 
 /**
- * Extracts exported functions and their JSDoc comments from solution source
+ * Extracts all functions (exported and non-exported) and their JSDoc comments from solution source
  * @param {string} sourceCode - The source code of the solution file
  * @returns {Object} Object mapping function names to their JSDoc descriptions
  */
-function extractExportedFunctions(sourceCode) {
+function extractAllFunctions(sourceCode) {
     const functions = {};
     
-    // Match exported functions with their JSDoc comments
-    // Pattern: /** JSDoc */ export function name(...) or export function name(...)
-    const functionPattern = /(\/\*\*[\s\S]*?\*\/)?\s*export\s+(?:async\s+)?function\s+(\w+)\s*\(/g;
+    // Match all function definitions (exported and non-exported) with their JSDoc comments
+    // Pattern: /** JSDoc */ (export)? (async)? function name(...)
+    const functionPattern = /(\/\*\*[\s\S]*?\*\/)?\s*(export\s+)?(async\s+)?function\s+(\w+)\s*\(/g;
     
     let match;
     while ((match = functionPattern.exec(sourceCode)) !== null) {
         const jsdocComment = match[1] || '';
-        const functionName = match[2];
+        const isExported = !!match[2];
+        const functionName = match[4];
         
         // Skip 'solve' function as it's the main entry point
         if (functionName === 'solve') {
@@ -227,6 +228,24 @@ function extractExportedFunctions(sourceCode) {
         const description = extractJSDocDescription(jsdocComment);
         if (description) {
             functions[functionName] = description;
+        } else if (isExported) {
+            // Include exported functions even without JSDoc (with a default description)
+            functions[functionName] = `Exported function used in the solution`;
+        }
+    }
+    
+    // Also find imported functions from utils
+    const importPattern = /import\s+\{([^}]+)\}\s+from\s+['"]\.\.\/utils\/(\w+)\.js['"]/g;
+    let importMatch;
+    while ((importMatch = importPattern.exec(sourceCode)) !== null) {
+        const imports = importMatch[1].split(',').map(s => s.trim());
+        const moduleName = importMatch[2];
+        
+        for (const importName of imports) {
+            // Add imported utility functions with a note that they're from utils
+            if (!functions[importName]) {
+                functions[importName] = `Utility function from utils/${moduleName}.js`;
+            }
         }
     }
     
@@ -249,14 +268,20 @@ export async function loadDaySolution(day) {
             const sourceResponse = await fetch(`./day${day}/solution.js`);
             if (sourceResponse.ok) {
                 const sourceCode = await sourceResponse.text();
-                const extractedFunctions = extractExportedFunctions(sourceCode);
+                const extractedFunctions = extractAllFunctions(sourceCode);
                 
                 // Merge with puzzleInfo if it exists, or create it
                 if (result.puzzleInfo) {
-                    // Use extracted functions if puzzleInfo.functions is not provided
-                    if (!result.puzzleInfo.functions || Object.keys(result.puzzleInfo.functions).length === 0) {
-                        result.puzzleInfo.functions = extractedFunctions;
+                    // Always merge extracted functions - include ALL functions found
+                    // Manual functions can provide additional descriptions but won't hide extracted ones
+                    if (!result.puzzleInfo.functions) {
+                        result.puzzleInfo.functions = {};
                     }
+                    // Merge: extracted functions are base, manual functions can override descriptions
+                    result.puzzleInfo.functions = {
+                        ...extractedFunctions,  // All extracted functions (base)
+                        ...result.puzzleInfo.functions  // Manual overrides/additions
+                    };
                 } else if (Object.keys(extractedFunctions).length > 0) {
                     // Create puzzleInfo if it doesn't exist but we found functions
                     result.puzzleInfo = {
