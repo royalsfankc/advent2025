@@ -1,5 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
-import { parseRange, isInvalidId, findInvalidIdsInRange, parseInput, solvePart1, isInvalidIdPart2, findInvalidIdsInRangePart2, solvePart2 } from './solution.js';
+import { isInvalidId, findInvalidIdsInRange, parseInput, solvePart1, isInvalidIdPart2, findInvalidIdsInRangePart2, solvePart2 } from './solution.js';
+import { parseRange } from '../utils/ranges.js';
 
 describe('Day 2 Solution', () => {
     describe('parseRange', () => {

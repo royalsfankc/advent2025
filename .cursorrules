@@ -35,11 +35,15 @@
 
 ```javascript
 // dayN/solution.js structure:
-// 1. Helper/utility functions (exported)
-// 2. solvePart1(input) - exported
-// 3. solvePart2(input) - exported  
-// 4. solve() - main async function, exported
+// 1. Import utilities from utils/ (if needed)
+// 2. Puzzle-specific helper functions (exported, if not generic enough for utils)
+// 3. solvePart1(input) - exported
+// 4. solvePart2(input) - exported  
+// 5. puzzleInfo - exported metadata object
+// 6. solve() - main async function, exported
 ```
+
+**Important**: Before creating new functions, check if similar functionality exists in `utils/`. Only create puzzle-specific functions in solution.js. Generic, reusable functions should go in `utils/`.
 
 ## Workflow When Creating/Modifying Functions
 
@@ -72,9 +76,14 @@ When creating a solution:
 
 ## File Organization
 
-- `dayN/solution.js` - Solution code with exported functions
+- `dayN/solution.js` - Solution code with exported functions (uses utils when possible)
 - `dayN/solution.test.js` - Tests for all functions
 - `dayN/input.txt` - Puzzle input
+- `utils/` - Reusable utility functions organized by domain:
+  - `utils/ranges.js` - Range parsing and manipulation
+  - `utils/strings.js` - String pattern matching and manipulation
+  - `utils/numbers.js` - Number operations (circular rotations, etc.)
+  - Each utils file has corresponding `*.test.js` file
 
 ## Puzzle Metadata Requirements
 

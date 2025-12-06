@@ -1,5 +1,7 @@
 // Day 1 Solution - Safe Dial Password
 
+import { applyCircularRotation, countValueInCircularMovement } from '../utils/numbers.js';
+
 /**
  * Fetches the input file for Day 1
  * @returns {Promise<string>} The input file content
@@ -43,19 +45,8 @@ export function parseRotation(rotationString) {
  * @returns {number} New dial position (0-99)
  */
 export function applyRotation(currentPosition, rotation) {
-    let newPosition;
-    
-    if (rotation.direction === 'L') {
-        // Left: subtract distance (wrap around if negative)
-        newPosition = currentPosition - rotation.distance;
-    } else {
-        // Right: add distance (wrap around if >= 100)
-        newPosition = currentPosition + rotation.distance;
-    }
-    
-    // Handle wrap-around using modulo arithmetic
-    // Add 100 before modulo to handle negative numbers correctly
-    return ((newPosition % 100) + 100) % 100;
+    const offset = rotation.direction === 'L' ? -rotation.distance : rotation.distance;
+    return applyCircularRotation(currentPosition, offset, 0, 99);
 }
 
 /**
@@ -70,43 +61,8 @@ export function countZeroCrossingsDuringRotation(startPosition, rotation) {
         return 0;
     }
     
-    let count = 0;
-    
-    if (rotation.direction === 'R') {
-        // Rotating right: count how many times we cross from 99 to 0
-        // Positions we pass through: startPos+1, startPos+2, ..., startPos+distance
-        // We're at 0 when: (startPos + k) % 100 === 0 for k in [1, distance]
-        // This happens when startPos + k is a multiple of 100
-        // Number of multiples of 100 in range [startPos+1, startPos+distance]
-        const start = startPosition + 1;
-        const end = startPosition + rotation.distance;
-        // Count multiples of 100 in [start, end]
-        const firstMultiple = Math.ceil(start / 100) * 100;
-        if (firstMultiple <= end) {
-            count = Math.floor((end - firstMultiple) / 100) + 1;
-        }
-    } else {
-        // Rotating left: count how many times we cross from 0 to 99
-        // Positions we pass through: startPos-1, startPos-2, ..., startPos-distance
-        // We're at 0 when: startPos - k = 0 (mod 100), for k in [1, distance]
-        // This happens when k = startPos, or k = startPos + 100, etc.
-        // But we exclude k=0 (starting position)
-        if (startPosition > 0 && startPosition <= rotation.distance) {
-            // We cross 0 at least once (when k = startPosition)
-            const remaining = rotation.distance - startPosition;
-            // After first crossing, every 100 more clicks we cross 0 again
-            count = 1 + Math.floor(remaining / 100);
-        } else if (startPosition === 0) {
-            // Starting at 0, we don't count the starting position
-            // We cross 0 again when we wrap around: after 100, 200, etc. clicks
-            count = Math.floor(rotation.distance / 100);
-        } else {
-            // startPosition > distance, we don't cross 0
-            count = 0;
-        }
-    }
-    
-    return count;
+    const offset = rotation.direction === 'L' ? -rotation.distance : rotation.distance;
+    return countValueInCircularMovement(startPosition, offset, 0, 0, 99);
 }
 
 /**

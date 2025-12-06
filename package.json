@@ -29,7 +29,8 @@
     "transform": {},
     "testMatch": [
       "**/day*/**/*.test.js",
-      "**/js/**/*.test.js"
+      "**/js/**/*.test.js",
+      "**/utils/**/*.test.js"
     ],
     "collectCoverageFrom": [
       "day*/solution.js",

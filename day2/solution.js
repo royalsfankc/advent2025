@@ -1,5 +1,8 @@
 // Day 2 Solution - Invalid Product IDs
 
+import { parseRanges } from '../utils/ranges.js';
+import { hasTwoIdenticalHalves, hasRepeatedPattern } from '../utils/strings.js';
+
 /**
  * Fetches the input file for Day 2
  * @returns {Promise<string>} The input file content
@@ -13,31 +16,6 @@ async function fetchInput() {
 }
 
 /**
- * Parses a range string into start and end numbers
- * @param {string} rangeString - Range string like "11-22"
- * @returns {{start: number, end: number}} Parsed range object
- */
-export function parseRange(rangeString) {
-    const parts = rangeString.trim().split('-');
-    if (parts.length !== 2) {
-        throw new Error(`Invalid range format: ${rangeString}`);
-    }
-    
-    const start = parseInt(parts[0], 10);
-    const end = parseInt(parts[1], 10);
-    
-    if (isNaN(start) || isNaN(end)) {
-        throw new Error(`Invalid numbers in range: ${rangeString}`);
-    }
-    
-    if (start > end) {
-        throw new Error(`Start must be <= end: ${rangeString}`);
-    }
-    
-    return { start, end };
-}
-
-/**
  * Checks if a number is invalid (made of digits repeated twice)
  * An invalid ID is one where the string representation is made of
  * the same sequence of digits repeated twice (e.g., 55, 6464, 123123)
@@ -45,20 +23,7 @@ export function parseRange(rangeString) {
  * @returns {boolean} True if the ID is invalid
  */
 export function isInvalidId(id) {
-    const str = id.toString();
-    
-    // Must have even length to be made of two equal parts
-    if (str.length % 2 !== 0) {
-        return false;
-    }
-    
-    // Split into two halves
-    const halfLength = str.length / 2;
-    const firstHalf = str.substring(0, halfLength);
-    const secondHalf = str.substring(halfLength);
-    
-    // Check if both halves are identical
-    return firstHalf === secondHalf;
+    return hasTwoIdenticalHalves(id.toString());
 }
 
 /**
@@ -85,8 +50,7 @@ export function findInvalidIdsInRange(start, end) {
  * @returns {{start: number, end: number}[]} Array of range objects
  */
 export function parseInput(input) {
-    const rangeStrings = input.trim().split(',').filter(s => s.trim());
-    return rangeStrings.map(parseRange);
+    return parseRanges(input);
 }
 
 /**
@@ -114,41 +78,7 @@ export function solvePart1(input) {
  * @returns {boolean} True if the ID is invalid
  */
 export function isInvalidIdPart2(id) {
-    const str = id.toString();
-    const length = str.length;
-    
-    // Need at least 2 characters to have a pattern repeated at least twice
-    if (length < 2) {
-        return false;
-    }
-    
-    // Check all possible ways to divide the string into equal parts
-    // We need at least 2 parts, so k can be from 2 to length
-    for (let k = 2; k <= length; k++) {
-        // Check if length is divisible by k
-        if (length % k !== 0) {
-            continue;
-        }
-        
-        const partLength = length / k;
-        const firstPart = str.substring(0, partLength);
-        
-        // Check if all k parts are identical
-        let allPartsMatch = true;
-        for (let i = 1; i < k; i++) {
-            const part = str.substring(i * partLength, (i + 1) * partLength);
-            if (part !== firstPart) {
-                allPartsMatch = false;
-                break;
-            }
-        }
-        
-        if (allPartsMatch) {
-            return true;
-        }
-    }
-    
-    return false;
+    return hasRepeatedPattern(id.toString(), 2);
 }
 
 /**
