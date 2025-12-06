@@ -77,7 +77,7 @@ When creating a solution:
 ## File Organization
 
 - `dayN/solution.js` - Solution code with exported functions (uses utils when possible)
-- `dayN/solution.test.js` - Tests for all functions
+- `dayN/solution.test.js` - Tests for all functions 
 - `dayN/input.txt` - Puzzle input
 - `utils/` - Reusable utility functions organized by domain:
   - `utils/ranges.js` - Range parsing and manipulation
