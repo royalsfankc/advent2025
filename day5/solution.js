@@ -1,6 +1,6 @@
 // Day 5 Solution - Fresh Ingredients
 
-import { parseRange, isInRange } from '../utils/ranges.js';
+import { parseRange, isInRange, range } from '../utils/ranges.js';
 
 /**
  * Fetches the input file for Day 5
@@ -67,6 +67,47 @@ export function isIngredientFresh(ingredientId, ranges) {
 }
 
 /**
+ * Parses only the ranges from the input (ignores ingredient IDs section)
+ * @param {string} input - The puzzle input
+ * @returns {Array<{start: number, end: number}>} Array of ranges
+ */
+export function parseRangesOnly(input) {
+    const lines = input.split('\n');
+    const ranges = [];
+    
+    for (const line of lines) {
+        const trimmed = line.trim();
+        
+        if (trimmed === '') {
+            // Stop at blank line (ingredient IDs section starts)
+            break;
+        }
+        
+        ranges.push(parseRange(trimmed));
+    }
+    
+    return ranges;
+}
+
+/**
+ * Gets all unique ingredient IDs that fall into any of the given ranges
+ * @param {Array<{start: number, end: number}>} ranges - Array of fresh ranges
+ * @returns {Set<number>} Set of all unique fresh ingredient IDs
+ */
+export function getAllFreshIngredientIds(ranges) {
+    const freshIds = new Set();
+    
+    for (const rangeObj of ranges) {
+        const idsInRange = range(rangeObj.start, rangeObj.end);
+        for (const id of idsInRange) {
+            freshIds.add(id);
+        }
+    }
+    
+    return freshIds;
+}
+
+/**
  * Solves Part 1: Count how many available ingredient IDs are fresh
  * An ingredient is fresh if it falls into any of the fresh ranges
  * @param {string} input - The puzzle input (ranges, blank line, ingredient IDs)
@@ -87,16 +128,28 @@ export function solvePart1(input) {
 }
 
 /**
+ * Solves Part 2: Count how many unique ingredient IDs are considered fresh by the ranges
+ * An ingredient ID is fresh if it falls into any range (overlapping ranges are handled)
+ * @param {string} input - The puzzle input (ranges, blank line, ingredient IDs - IDs are ignored)
+ * @returns {number} Number of unique fresh ingredient IDs
+ */
+export function solvePart2(input) {
+    const ranges = parseRangesOnly(input);
+    const freshIds = getAllFreshIngredientIds(ranges);
+    return freshIds.size;
+}
+
+/**
  * Puzzle metadata for Day 5
  */
 export const puzzleInfo = {
     title: "Fresh Ingredients",
     description: "The database contains fresh ingredient ID ranges and available ingredient IDs. Determine which available ingredients are fresh.",
     part1Description: "Count how many of the available ingredient IDs are fresh (fall into any of the fresh ranges).",
-    part2Description: "Part 2 not yet implemented",
+    part2Description: "Count how many unique ingredient IDs are considered fresh by the ranges (ignoring the available ingredient IDs section).",
     approach: {
         part1: "Parse the input into ranges and ingredient IDs (separated by a blank line). For each ingredient ID, check if it falls into any of the fresh ranges. Count how many are fresh.",
-        part2: "Not yet implemented"
+        part2: "Parse only the ranges from the input (stop at the blank line). For each range, generate all ingredient IDs in that range. Use a Set to collect all unique IDs across all ranges. Return the size of the Set."
     }
 };
 
@@ -108,7 +161,7 @@ export async function solve() {
     try {
         const input = await fetchInput();
         const part1 = solvePart1(input);
-        const part2 = null; // Part 2 not yet implemented
+        const part2 = solvePart2(input);
         
         return {
             part1,
