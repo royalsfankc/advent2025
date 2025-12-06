@@ -162,10 +162,7 @@ export const puzzleInfo = {
         part1: "For each bank, try all pairs of batteries (i, j) where i < j. The joltage is the two-digit number formed by digit[i] * 10 + digit[j]. Find the maximum joltage for each bank and sum them.",
         part2: "For each bank, use a greedy algorithm to select exactly 12 batteries. For each position from left to right, select the largest digit available while ensuring enough digits remain to complete the selection. This maximizes the resulting 12-digit number."
     },
-    functions: {
-        findMaxJoltage: "Finds the maximum two-digit joltage possible from a bank by trying all pairs of batteries.",
-        solvePart1: "Processes all banks, finds max joltage for each, and sums them."
-    }
+    // functions field is optional - will be auto-extracted from JSDoc if not provided
 };
 
 /**
