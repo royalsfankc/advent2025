@@ -93,7 +93,9 @@ When creating a solution:
 - `part1Description` - What Part 1 asks for
 - `part2Description` - What Part 2 asks for
 - `approach` - Object with `part1` and `part2` explaining the solution approach
-- `functions` - Object mapping function names to their descriptions
+- `functions` - **OPTIONAL**: Object mapping function names to their descriptions. If not provided, functions are automatically extracted from exported functions and their JSDoc comments.
+
+**Note**: Function documentation is automatically extracted from JSDoc comments on exported functions. Make sure all exported functions (except `solve`) have clear JSDoc comments describing what they do.
 
 Example:
 ```javascript

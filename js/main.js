@@ -175,14 +175,101 @@ export function formatErrorMessage(day, error) {
 }
 
 /**
- * Loads and executes a day's solution
+ * Extracts JSDoc description from a comment string
+ * @param {string} jsdocComment - The JSDoc comment
+ * @returns {string} The description text
+ */
+function extractJSDocDescription(jsdocComment) {
+    if (!jsdocComment) {
+        return '';
+    }
+    
+    // Remove /** and */ markers
+    let cleaned = jsdocComment.replace(/^\/\*\*|\*\/$/g, '').trim();
+    
+    // Remove leading * from each line
+    cleaned = cleaned.split('\n')
+        .map(line => line.replace(/^\s*\*\s?/, '').trim())
+        .join(' ')
+        .trim();
+    
+    // Extract the description (everything before @param, @returns, etc.)
+    const descriptionMatch = cleaned.match(/^([^@]+)/);
+    if (descriptionMatch) {
+        return descriptionMatch[1].trim();
+    }
+    
+    return cleaned;
+}
+
+/**
+ * Extracts exported functions and their JSDoc comments from solution source
+ * @param {string} sourceCode - The source code of the solution file
+ * @returns {Object} Object mapping function names to their JSDoc descriptions
+ */
+function extractExportedFunctions(sourceCode) {
+    const functions = {};
+    
+    // Match exported functions with their JSDoc comments
+    // Pattern: /** JSDoc */ export function name(...) or export function name(...)
+    const functionPattern = /(\/\*\*[\s\S]*?\*\/)?\s*export\s+(?:async\s+)?function\s+(\w+)\s*\(/g;
+    
+    let match;
+    while ((match = functionPattern.exec(sourceCode)) !== null) {
+        const jsdocComment = match[1] || '';
+        const functionName = match[2];
+        
+        // Skip 'solve' function as it's the main entry point
+        if (functionName === 'solve') {
+            continue;
+        }
+        
+        const description = extractJSDocDescription(jsdocComment);
+        if (description) {
+            functions[functionName] = description;
+        }
+    }
+    
+    return functions;
+}
+
+/**
+ * Loads and executes a day's solution, extracting function info dynamically
  * @param {number} day - The day number
- * @returns {Promise<Object>} The solution result
+ * @returns {Promise<Object>} The solution result with dynamically extracted function info
  */
 export async function loadDaySolution(day) {
     try {
+        // Load the module
         const dayModule = await import(`../day${day}/solution.js`);
-        return await dayModule.solve();
+        const result = await dayModule.solve();
+        
+        // Fetch the source code to extract function documentation
+        try {
+            const sourceResponse = await fetch(`./day${day}/solution.js`);
+            if (sourceResponse.ok) {
+                const sourceCode = await sourceResponse.text();
+                const extractedFunctions = extractExportedFunctions(sourceCode);
+                
+                // Merge with puzzleInfo if it exists, or create it
+                if (result.puzzleInfo) {
+                    // Use extracted functions if puzzleInfo.functions is not provided
+                    if (!result.puzzleInfo.functions || Object.keys(result.puzzleInfo.functions).length === 0) {
+                        result.puzzleInfo.functions = extractedFunctions;
+                    }
+                } else if (Object.keys(extractedFunctions).length > 0) {
+                    // Create puzzleInfo if it doesn't exist but we found functions
+                    result.puzzleInfo = {
+                        functions: extractedFunctions
+                    };
+                }
+            }
+        } catch (sourceError) {
+            // If we can't fetch source, just use what's in puzzleInfo
+            console.warn(`Could not fetch source for day ${day}:`, sourceError);
+        }
+        
+        return result;
     } catch (error) {
         throw new Error(`Failed to load day ${day}: ${error.message}`);
     }
