@@ -1,6 +1,6 @@
 // Day 5 Solution - Fresh Ingredients
 
-import { parseRange, isInRange, range } from '../utils/ranges.js';
+import { parseRange, isInRange } from '../utils/ranges.js';
 
 /**
  * Fetches the input file for Day 5
@@ -90,21 +90,54 @@ export function parseRangesOnly(input) {
 }
 
 /**
- * Gets all unique ingredient IDs that fall into any of the given ranges
- * @param {Array<{start: number, end: number}>} ranges - Array of fresh ranges
- * @returns {Set<number>} Set of all unique fresh ingredient IDs
+ * Merges overlapping and adjacent ranges
+ * @param {Array<{start: number, end: number}>} ranges - Array of ranges to merge
+ * @returns {Array<{start: number, end: number}>} Array of merged ranges
  */
-export function getAllFreshIngredientIds(ranges) {
-    const freshIds = new Set();
+export function mergeRanges(ranges) {
+    if (ranges.length === 0) {
+        return [];
+    }
     
-    for (const rangeObj of ranges) {
-        const idsInRange = range(rangeObj.start, rangeObj.end);
-        for (const id of idsInRange) {
-            freshIds.add(id);
+    // Sort ranges by start value
+    const sorted = [...ranges].sort((a, b) => a.start - b.start);
+    
+    const merged = [sorted[0]];
+    
+    for (let i = 1; i < sorted.length; i++) {
+        const current = sorted[i];
+        const lastMerged = merged[merged.length - 1];
+        
+        // If current range overlaps or is adjacent to the last merged range
+        // (current.start <= lastMerged.end + 1 because adjacent ranges should merge)
+        if (current.start <= lastMerged.end + 1) {
+            // Merge: extend the end if needed
+            lastMerged.end = Math.max(lastMerged.end, current.end);
+        } else {
+            // No overlap, add as new range
+            merged.push(current);
         }
     }
     
-    return freshIds;
+    return merged;
+}
+
+/**
+ * Counts the total number of unique ingredient IDs covered by the ranges
+ * Uses interval merging to handle large ranges efficiently
+ * @param {Array<{start: number, end: number}>} ranges - Array of fresh ranges
+ * @returns {number} Total count of unique fresh ingredient IDs
+ */
+export function countFreshIngredientIds(ranges) {
+    const merged = mergeRanges(ranges);
+    
+    let total = 0;
+    for (const rangeObj of merged) {
+        // Count: end - start + 1 (inclusive)
+        total += rangeObj.end - rangeObj.start + 1;
+    }
+    
+    return total;
 }
 
 /**
@@ -130,13 +163,13 @@ export function solvePart1(input) {
 /**
  * Solves Part 2: Count how many unique ingredient IDs are considered fresh by the ranges
  * An ingredient ID is fresh if it falls into any range (overlapping ranges are handled)
+ * Uses interval merging to efficiently handle large ranges
  * @param {string} input - The puzzle input (ranges, blank line, ingredient IDs - IDs are ignored)
  * @returns {number} Number of unique fresh ingredient IDs
  */
 export function solvePart2(input) {
     const ranges = parseRangesOnly(input);
-    const freshIds = getAllFreshIngredientIds(ranges);
-    return freshIds.size;
+    return countFreshIngredientIds(ranges);
 }
 
 /**
@@ -149,7 +182,7 @@ export const puzzleInfo = {
     part2Description: "Count how many unique ingredient IDs are considered fresh by the ranges (ignoring the available ingredient IDs section).",
     approach: {
         part1: "Parse the input into ranges and ingredient IDs (separated by a blank line). For each ingredient ID, check if it falls into any of the fresh ranges. Count how many are fresh.",
-        part2: "Parse only the ranges from the input (stop at the blank line). For each range, generate all ingredient IDs in that range. Use a Set to collect all unique IDs across all ranges. Return the size of the Set."
+        part2: "Parse only the ranges from the input (stop at the blank line). Merge overlapping and adjacent ranges, then sum the count of IDs in each merged range. This efficiently handles very large ranges without generating all individual IDs."
     }
 };
 
