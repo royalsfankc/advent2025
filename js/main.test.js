@@ -43,7 +43,8 @@ describe('Main.js Functions', () => {
             const result = {};
             const html = formatSolutionResult(result);
             
-            expect(html).toContain('No solution available yet');
+            expect(html).toContain('Answers');
+            expect(html).not.toContain('Part 1');
         });
 
         it('should handle null result', () => {

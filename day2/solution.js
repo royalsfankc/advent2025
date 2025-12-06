@@ -187,6 +187,29 @@ export function solvePart2(input) {
 }
 
 /**
+ * Puzzle metadata for Day 2
+ */
+export const puzzleInfo = {
+    title: "Invalid Product IDs",
+    description: "Find invalid product IDs in given ranges. An invalid ID is one made of digits repeated in a pattern.",
+    part1Description: "An ID is invalid if it's made of some sequence of digits repeated exactly twice (e.g., 55, 6464, 123123).",
+    part2Description: "An ID is invalid if it's made of some sequence of digits repeated at least twice (e.g., 111, 123123123, 1212121212).",
+    approach: {
+        part1: "For each ID in each range, check if the string representation has even length and the first half equals the second half.",
+        part2: "For each ID, check all possible ways to divide it into equal parts (2, 3, 4, etc.). If all parts are identical, it's invalid."
+    },
+    functions: {
+        parseRange: "Parses range strings like '11-22' into start and end numbers.",
+        isInvalidId: "Checks if a number's string representation has even length and first half equals second half.",
+        isInvalidIdPart2: "Checks if a number can be divided into equal parts (at least 2) that are all identical.",
+        findInvalidIdsInRange: "Iterates through a range and collects all invalid IDs using Part 1 rules.",
+        findInvalidIdsInRangePart2: "Iterates through a range and collects all invalid IDs using Part 2 rules.",
+        solvePart1: "Parses all ranges, finds invalid IDs in each, and sums them all.",
+        solvePart2: "Same as Part 1 but uses Part 2 invalid ID rules."
+    }
+};
+
+/**
  * Main solve function that fetches input and solves both parts
  * @returns {Promise<Object>} Object with part1 and part2 answers
  */
@@ -198,7 +221,9 @@ export async function solve() {
         
         return {
             part1,
-            part2
+            part2,
+            input,
+            puzzleInfo
         };
     } catch (error) {
         return {

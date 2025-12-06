@@ -17,6 +17,78 @@ export async function checkDaySolutionExists(day) {
 }
 
 /**
+ * Formats input snippet with expand/collapse functionality
+ * @param {string} input - The full input
+ * @returns {string} HTML string for input display
+ */
+function formatInputSnippet(input) {
+    if (!input || input.trim().length === 0) {
+        return '';
+    }
+    
+    const lines = input.trim().split('\n');
+    const snippetLength = 3;
+    const hasMore = lines.length > snippetLength;
+    
+    let html = '<div class="input-section">';
+    html += '<h3>📄 Input</h3>';
+    html += '<div class="input-snippet">';
+    
+    // Show first few lines
+    for (let i = 0; i < Math.min(snippetLength, lines.length); i++) {
+        html += `<div class="input-line">${escapeHtml(lines[i])}</div>`;
+    }
+    
+    if (hasMore) {
+        html += `<div class="input-more" style="display: none;">`;
+        for (let i = snippetLength; i < lines.length; i++) {
+            html += `<div class="input-line">${escapeHtml(lines[i])}</div>`;
+        }
+        html += `</div>`;
+        html += `<button class="toggle-input" onclick="this.previousElementSibling.style.display = this.previousElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.previousElementSibling.style.display === 'none' ? 'Show all input' : 'Hide input';">Show all input</button>`;
+    }
+    
+    html += '</div></div>';
+    return html;
+}
+
+/**
+ * Escapes HTML to prevent XSS
+ * @param {string} text - Text to escape
+ * @returns {string} Escaped HTML
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Formats function explanations
+ * @param {Object} functions - Object with function names and descriptions
+ * @returns {string} HTML string for function explanations
+ */
+function formatFunctionExplanations(functions) {
+    if (!functions || Object.keys(functions).length === 0) {
+        return '';
+    }
+    
+    let html = '<div class="functions-section">';
+    html += '<h3>🔧 Solution Functions</h3>';
+    html += '<div class="functions-list">';
+    
+    for (const [funcName, description] of Object.entries(functions)) {
+        html += `<div class="function-item">`;
+        html += `<code class="function-name">${funcName}()</code>`;
+        html += `<p class="function-desc">${escapeHtml(description)}</p>`;
+        html += `</div>`;
+    }
+    
+    html += '</div></div>';
+    return html;
+}
+
+/**
  * Formats the solution result into HTML
  * @param {Object} result - The solution result object
  * @returns {string} HTML string to display
@@ -28,16 +100,65 @@ export function formatSolutionResult(result) {
 
     let html = '';
     
+    // Puzzle info section
+    if (result.puzzleInfo) {
+        html += '<div class="puzzle-info-section">';
+        html += `<h3>🎯 ${escapeHtml(result.puzzleInfo.title)}</h3>`;
+        html += `<p class="puzzle-description">${escapeHtml(result.puzzleInfo.description)}</p>`;
+        
+        if (result.puzzleInfo.part1Description) {
+            html += `<div class="part-explanation">`;
+            html += `<strong>Part 1:</strong> ${escapeHtml(result.puzzleInfo.part1Description)}`;
+            html += `</div>`;
+        }
+        
+        if (result.puzzleInfo.part2Description) {
+            html += `<div class="part-explanation">`;
+            html += `<strong>Part 2:</strong> ${escapeHtml(result.puzzleInfo.part2Description)}`;
+            html += `</div>`;
+        }
+        
+        if (result.puzzleInfo.approach) {
+            html += '<div class="approach-section">';
+            html += '<h4>💡 Approach</h4>';
+            if (result.puzzleInfo.approach.part1) {
+                html += `<p><strong>Part 1:</strong> ${escapeHtml(result.puzzleInfo.approach.part1)}</p>`;
+            }
+            if (result.puzzleInfo.approach.part2) {
+                html += `<p><strong>Part 2:</strong> ${escapeHtml(result.puzzleInfo.approach.part2)}</p>`;
+            }
+            html += '</div>';
+        }
+        
+        html += '</div>';
+    }
+    
+    // Answers section
+    html += '<div class="answers-section">';
+    html += '<h3>✅ Answers</h3>';
+    
     if (result.part1 !== undefined) {
-        html += `<p><strong>Part 1:</strong> ${result.part1}</p>`;
+        html += `<p><strong>Part 1:</strong> <span class="answer-value">${result.part1}</span></p>`;
     }
     
     if (result.part2 !== undefined) {
-        html += `<p><strong>Part 2:</strong> ${result.part2}</p>`;
+        html += `<p><strong>Part 2:</strong> <span class="answer-value">${result.part2}</span></p>`;
     }
     
     if (result.error) {
         html += `<p class="error">Error: ${result.error}</p>`;
+    }
+    
+    html += '</div>';
+    
+    // Input section
+    if (result.input) {
+        html += formatInputSnippet(result.input);
+    }
+    
+    // Functions section
+    if (result.puzzleInfo && result.puzzleInfo.functions) {
+        html += formatFunctionExplanations(result.puzzleInfo.functions);
     }
     
     return html || '<p>No solution available yet.</p>';

@@ -168,6 +168,27 @@ export function solvePart2(input) {
 }
 
 /**
+ * Puzzle metadata for Day 1
+ */
+export const puzzleInfo = {
+    title: "Safe Dial Password",
+    description: "A safe has a dial with numbers 0-99. You need to follow rotation instructions (L for left, R for right) and count how many times the dial points at 0.",
+    part1Description: "Count how many times the dial points at 0 after any rotation completes.",
+    part2Description: "Count how many times the dial points at 0 during rotations (as it passes through 0) plus at the end.",
+    approach: {
+        part1: "Start at position 50. For each rotation, apply it to the current position (handling wrap-around), then check if the new position is 0.",
+        part2: "Similar to Part 1, but also count how many times we pass through 0 while rotating (not just at the end). For each rotation, calculate how many times we cross 0 during the movement."
+    },
+    functions: {
+        parseRotation: "Parses rotation strings like 'L68' into direction and distance.",
+        applyRotation: "Applies a rotation to the current dial position, handling circular wrap-around (0-99).",
+        countZeroCrossingsDuringRotation: "Counts how many times the dial passes through 0 during a rotation by checking all intermediate positions.",
+        solvePart1: "Processes all rotations, tracks position, and counts when dial ends at 0.",
+        solvePart2: "Processes all rotations, counts zeros during rotation plus zeros at the end."
+    }
+};
+
+/**
  * Main solve function that fetches input and solves both parts
  * @returns {Promise<Object>} Object with part1 and part2 answers
  */
@@ -179,7 +200,9 @@ export async function solve() {
         
         return {
             part1,
-            part2
+            part2,
+            input,
+            puzzleInfo
         };
     } catch (error) {
         return {

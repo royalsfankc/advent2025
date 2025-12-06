@@ -76,6 +76,35 @@ When creating a solution:
 - `dayN/solution.test.js` - Tests for all functions
 - `dayN/input.txt` - Puzzle input
 
+## Puzzle Metadata Requirements
+
+**CRITICAL**: Every solution file MUST export a `puzzleInfo` object with:
+- `title` - Puzzle title
+- `description` - General puzzle description
+- `part1Description` - What Part 1 asks for
+- `part2Description` - What Part 2 asks for
+- `approach` - Object with `part1` and `part2` explaining the solution approach
+- `functions` - Object mapping function names to their descriptions
+
+Example:
+```javascript
+export const puzzleInfo = {
+    title: "Puzzle Title",
+    description: "What the puzzle is about",
+    part1Description: "What Part 1 asks for",
+    part2Description: "What Part 2 asks for",
+    approach: {
+        part1: "How Part 1 is solved",
+        part2: "How Part 2 is solved"
+    },
+    functions: {
+        functionName: "What this function does"
+    }
+};
+```
+
+The `solve()` function must return `{ part1, part2, input, puzzleInfo }` for the educational display to work.
+
 ## When AI Assistant is Asked to:
 
 - **Create a function**: Immediately create tests for it
