@@ -60,13 +60,94 @@ export function solvePart1(input) {
 }
 
 /**
- * Solves Part 2 of Day 3
- * @param {string} input - The puzzle input
- * @returns {string|number} The answer for part 2
+ * Finds the maximum joltage possible from a bank by selecting exactly 12 batteries
+ * Uses a greedy approach: select the largest possible digits from left to right
+ * while ensuring we can still select enough digits to reach exactly 12
+ * @param {string} bank - String of digits representing battery joltages
+ * @returns {number} Maximum joltage possible (as a number, but may be very large)
+ */
+export function findMaxJoltagePart2(bank) {
+    const targetDigits = 12;
+    const bankLength = bank.length;
+    
+    if (bankLength < targetDigits) {
+        // Not enough batteries, return 0 or the number we can form
+        return 0;
+    }
+    
+    if (bankLength === targetDigits) {
+        // Exactly 12 batteries, use all of them
+        return parseInt(bank, 10);
+    }
+    
+    // We need to select exactly 12 digits from the bank
+    // Use greedy algorithm: for each position, pick the largest digit available
+    // while ensuring we can still select enough remaining digits
+    
+    const selected = [];
+    let startIndex = 0;
+    let remainingToSelect = targetDigits;
+    const remainingLength = bankLength;
+    
+    for (let pos = 0; pos < targetDigits; pos++) {
+        // Calculate how many digits we still need after this position
+        const digitsAfter = targetDigits - pos - 1;
+        // Calculate the last index we can pick from (to ensure we have enough digits left)
+        const lastPossibleIndex = bankLength - digitsAfter - 1;
+        
+        // Find the largest digit in the available range
+        let maxDigit = -1;
+        let maxIndex = -1;
+        
+        for (let i = startIndex; i <= lastPossibleIndex; i++) {
+            const digit = parseInt(bank[i], 10);
+            if (digit > maxDigit) {
+                maxDigit = digit;
+                maxIndex = i;
+            }
+        }
+        
+        // Select this digit and move the start index forward
+        selected.push(maxDigit);
+        startIndex = maxIndex + 1;
+    }
+    
+    // Convert selected digits to a number
+    // For very large numbers, we'll use BigInt or return as string
+    // But for now, let's try parseInt - if it's too large, we'll need BigInt
+    const resultString = selected.join('');
+    
+    // Check if the number is too large for regular JavaScript number
+    if (resultString.length > 15) {
+        // Use BigInt for very large numbers
+        return BigInt(resultString);
+    }
+    
+    return parseInt(resultString, 10);
+}
+
+/**
+ * Solves Part 2: Find maximum joltage from each bank by selecting exactly 12 batteries
+ * @param {string} input - The puzzle input (one bank per line)
+ * @returns {number|string} Total output joltage (sum of max joltages from each bank)
  */
 export function solvePart2(input) {
-    // Part 2 not available yet
-    return 'Not implemented yet';
+    const banks = input.trim().split('\n').filter(line => line.trim());
+    let totalJoltage = BigInt(0);
+    
+    for (const bank of banks) {
+        const maxJoltage = findMaxJoltagePart2(bank.trim());
+        if (maxJoltage > 0) {
+            totalJoltage += BigInt(maxJoltage.toString());
+        }
+    }
+    
+    // Return as string if it's too large for safe integer, otherwise as number
+    if (totalJoltage > BigInt(Number.MAX_SAFE_INTEGER)) {
+        return totalJoltage.toString();
+    }
+    
+    return Number(totalJoltage);
 }
 
 /**
@@ -76,9 +157,10 @@ export const puzzleInfo = {
     title: "Battery Banks",
     description: "Batteries are arranged in banks. Each bank has batteries labeled 1-9. You need to turn on exactly two batteries per bank to produce joltage.",
     part1Description: "Find the maximum joltage possible from each bank (by selecting exactly 2 batteries) and sum them all.",
-    part2Description: "Part 2 not available yet",
+    part2Description: "Find the maximum joltage possible from each bank (by selecting exactly 12 batteries) and sum them all.",
     approach: {
-        part1: "For each bank, try all pairs of batteries (i, j) where i < j. The joltage is the two-digit number formed by digit[i] * 10 + digit[j]. Find the maximum joltage for each bank and sum them."
+        part1: "For each bank, try all pairs of batteries (i, j) where i < j. The joltage is the two-digit number formed by digit[i] * 10 + digit[j]. Find the maximum joltage for each bank and sum them.",
+        part2: "For each bank, use a greedy algorithm to select exactly 12 batteries. For each position from left to right, select the largest digit available while ensuring enough digits remain to complete the selection. This maximizes the resulting 12-digit number."
     },
     functions: {
         findMaxJoltage: "Finds the maximum two-digit joltage possible from a bank by trying all pairs of batteries.",
