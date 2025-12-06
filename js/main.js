@@ -9,17 +9,22 @@ const MAX_DAYS = 25;
  */
 export async function checkDaySolutionExists(day) {
     try {
-        // In browser: use fetch to check if file exists
+        // In browser: use HEAD request to check if file exists (less noisy than GET)
         // In Node.js test: use import (which will be caught if it fails)
         if (typeof fetch !== 'undefined') {
-            const response = await fetch(`./day${day}/solution.js`);
+            // Use HEAD request to avoid loading the file and reduce console noise
+            const response = await fetch(`./day${day}/solution.js`, { 
+                method: 'HEAD',
+                cache: 'no-cache'
+            });
             return response.ok;
         } else {
             // Node.js environment (for tests) - use import
             await import(`../day${day}/solution.js`);
             return true;
         }
-    } catch {
+    } catch (error) {
+        // Silently return false - don't log errors for missing files
         return false;
     }
 }
@@ -327,22 +332,34 @@ function scrollToAnswer() {
  * @param {Function} onClickHandler - Function to call when a button is clicked
  */
 export async function generateDayButtons(container, onClickHandler) {
+    // Create all buttons first (disabled by default)
+    const buttons = [];
     for (let day = 1; day <= MAX_DAYS; day++) {
         const button = document.createElement('button');
-        button.className = 'day-button';
+        button.className = 'day-button disabled';
         button.textContent = `Day ${day}`;
-        
-        // Check if solution exists
-        const hasSolution = await checkDaySolutionExists(day);
-        if (!hasSolution) {
-            button.classList.add('disabled');
-            button.disabled = true;
-        } else {
-            button.addEventListener('click', () => onClickHandler(day));
-        }
-        
+        button.disabled = true;
         container.appendChild(button);
+        buttons.push({ day, button });
     }
+    
+    // Check for solutions in parallel (but catch errors silently)
+    // This reduces console noise by batching requests
+    const checkPromises = buttons.map(async ({ day, button }) => {
+        try {
+            const hasSolution = await checkDaySolutionExists(day);
+            if (hasSolution) {
+                button.classList.remove('disabled');
+                button.disabled = false;
+                button.addEventListener('click', () => onClickHandler(day));
+            }
+        } catch (error) {
+            // Silently ignore errors - button stays disabled
+        }
+    });
+    
+    // Wait for all checks to complete (but don't fail if some error)
+    await Promise.allSettled(checkPromises);
 }
 
 /**
