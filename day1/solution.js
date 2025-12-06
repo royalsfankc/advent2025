@@ -59,6 +59,57 @@ export function applyRotation(currentPosition, rotation) {
 }
 
 /**
+ * Counts how many times the dial passes through 0 during a rotation
+ * This counts positions we pass through while moving, excluding the starting position
+ * @param {number} startPosition - Starting dial position (0-99)
+ * @param {{direction: string, distance: number}} rotation - Rotation to apply
+ * @returns {number} Number of times dial passes through 0 during rotation (excluding start)
+ */
+export function countZeroCrossingsDuringRotation(startPosition, rotation) {
+    if (rotation.distance === 0) {
+        return 0;
+    }
+    
+    let count = 0;
+    
+    if (rotation.direction === 'R') {
+        // Rotating right: count how many times we cross from 99 to 0
+        // Positions we pass through: startPos+1, startPos+2, ..., startPos+distance
+        // We're at 0 when: (startPos + k) % 100 === 0 for k in [1, distance]
+        // This happens when startPos + k is a multiple of 100
+        // Number of multiples of 100 in range [startPos+1, startPos+distance]
+        const start = startPosition + 1;
+        const end = startPosition + rotation.distance;
+        // Count multiples of 100 in [start, end]
+        const firstMultiple = Math.ceil(start / 100) * 100;
+        if (firstMultiple <= end) {
+            count = Math.floor((end - firstMultiple) / 100) + 1;
+        }
+    } else {
+        // Rotating left: count how many times we cross from 0 to 99
+        // Positions we pass through: startPos-1, startPos-2, ..., startPos-distance
+        // We're at 0 when: startPos - k = 0 (mod 100), for k in [1, distance]
+        // This happens when k = startPos, or k = startPos + 100, etc.
+        // But we exclude k=0 (starting position)
+        if (startPosition > 0 && startPosition <= rotation.distance) {
+            // We cross 0 at least once (when k = startPosition)
+            const remaining = rotation.distance - startPosition;
+            // After first crossing, every 100 more clicks we cross 0 again
+            count = 1 + Math.floor(remaining / 100);
+        } else if (startPosition === 0) {
+            // Starting at 0, we don't count the starting position
+            // We cross 0 again when we wrap around: after 100, 200, etc. clicks
+            count = Math.floor(rotation.distance / 100);
+        } else {
+            // startPosition > distance, we don't cross 0
+            count = 0;
+        }
+    }
+    
+    return count;
+}
+
+/**
  * Solves Part 1: Count how many times the dial points at 0 after any rotation
  * @param {string} input - The puzzle input (one rotation per line)
  * @returns {number} The number of times the dial points at 0
@@ -81,13 +132,39 @@ export function solvePart1(input) {
 }
 
 /**
- * Solves Part 2 of Day 1
- * @param {string} input - The puzzle input
- * @returns {string|number} The answer for part 2
+ * Solves Part 2: Count how many times the dial points at 0 during rotations AND at the end
+ * @param {string} input - The puzzle input (one rotation per line)
+ * @returns {number} The number of times the dial points at 0 (during + end)
  */
 export function solvePart2(input) {
-    // Part 2 not available yet
-    return 'Not implemented yet';
+    const rotations = input.trim().split('\n').filter(line => line.trim());
+    let position = 50; // Start at 50
+    let count = 0;
+    
+    for (const rotationString of rotations) {
+        const rotation = parseRotation(rotationString);
+        
+        // Count how many times we pass through 0 during this rotation
+        // This counts positions from start+1 to start+distance (excluding start, including end)
+        const duringCount = countZeroCrossingsDuringRotation(position, rotation);
+        count += duringCount;
+        
+        // Apply the rotation
+        const newPosition = applyRotation(position, rotation);
+        
+        // If we end at 0, check if we already counted it during the rotation
+        // The ending position is counted during rotation if it's 0, so we don't count it again
+        // UNLESS we didn't pass through 0 during the rotation at all
+        if (newPosition === 0 && duringCount === 0) {
+            // We end at 0 but didn't pass through it during, so count it
+            count++;
+        }
+        // If duringCount > 0 and we end at 0, we already counted the ending 0 during the rotation
+        
+        position = newPosition;
+    }
+    
+    return count;
 }
 
 /**
