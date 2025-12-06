@@ -9,9 +9,16 @@ const MAX_DAYS = 25;
  */
 export async function checkDaySolutionExists(day) {
     try {
-        // Use fetch to check if file exists without causing import errors
-        const response = await fetch(`./day${day}/solution.js`);
-        return response.ok;
+        // In browser: use fetch to check if file exists
+        // In Node.js test: use import (which will be caught if it fails)
+        if (typeof fetch !== 'undefined') {
+            const response = await fetch(`./day${day}/solution.js`);
+            return response.ok;
+        } else {
+            // Node.js environment (for tests) - use import
+            await import(`../day${day}/solution.js`);
+            return true;
+        }
     } catch {
         return false;
     }
